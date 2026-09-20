@@ -206,3 +206,13 @@ SMOKE OK title="DeepSeek Harness"
 - `src/repo/` 与 `dist/win-unpacked/resources/deepseek-harness-master/` 是上游源码快照，
   版权与许可归上游所有，详见各自的 `LICENSE` 与 `THIRD_PARTY_NOTICES.md`。
 - 本仓库自身的外壳代码以 MIT 许可发布，见 [LICENSE](LICENSE)。
+  该许可**仅覆盖**本仓库作者编写的部分：`app/`、`tools/`、`docs/` 与本仓库的顶层文档。
+
+- 打包进去的第三方组件各自遵循其原有许可，与本仓库的 MIT 许可无关：
+
+  | 组件 | 位置 | 许可 |
+  | --- | --- | --- |
+  | DeepSeek Harness（`@deepseek-ai/dsh`）及上游源码快照 | `runtime/node_modules/`、`src/repo/`、`dist/win-unpacked/resources/deepseek-harness-master/` | 见各自目录下的 `LICENSE` 与 `THIRD_PARTY_NOTICES.md` |
+  | Electron / Chromium 及随包原生库 | `dist/win-unpacked/`、`app/node_modules/` | `dist/win-unpacked/LICENSES.chromium.html` |
+  | 其余 npm 生产依赖 | `runtime/node_modules/` | 各包内 `LICENSE` |
+
