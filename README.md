@@ -36,14 +36,17 @@
 
 到本仓库的 **Releases** 页面下载，无需构建环境：
 
-| 下载项 | 适用场景 |
-| --- | --- |
-| `DeepSeek-Harness-Portable-0.1.6-x64.exe` | 单文件绿色版，拷走就能跑 |
-| `DeepSeek-Harness-Setup-0.1.6.exe` | 需要开始菜单/桌面快捷方式 |
-| `DeepSeek-Harness-win-unpacked-0.1.6.zip` | 免安装目录版，解压即用、启动最快 |
+| 下载项 | 大小 | 适用场景 |
+| --- | --- | --- |
+| `DeepSeek-Harness-win-unpacked-0.1.6.zip` | 252 MB | 免安装目录版，解压即用、启动最快（推荐） |
+| `DeepSeek-Harness-Portable-0.1.6-x64.exe` | 142 MB | 单文件绿色版，拷走就能跑 |
+| `DeepSeek-Harness-Setup-0.1.6.exe` | 142 MB | 需要开始菜单/桌面快捷方式 |
 
 > 由于 GitHub 单文件 100 MB 的硬限制，这些体积超过 100 MB 的成品放在 Releases 而不是仓库里；
-> 仓库中的 `dist/` 保留了除这 3 个 exe 之外的全部构建产物与配置。
+> 仓库中的 `dist/` 保留了除这些 exe 之外的全部构建产物与配置。
+>
+> **发布前校验**：`DeepSeek-Harness-win-unpacked-0.1.6.zip` 已逐条目校验通过——
+> 25500 个条目全部解压成功且 CRC32 与中央目录记录一致（670.9 MiB 原始内容，0 失败）。
 
 首次运行若出现 Windows SmartScreen「未知发布者」提示，选择**更多信息 → 仍要运行**即可（本项目未做商业代码签名）。
 

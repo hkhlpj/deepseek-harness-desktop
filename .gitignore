@@ -13,6 +13,7 @@
 #   dist/win-unpacked/DeepSeek Harness.exe        235 MB  -> == that Electron runtime
 #   dist/DeepSeek-Harness-Setup-0.1.6.exe         142 MB  -> GitHub Releases
 #   dist/DeepSeek-Harness-Portable-0.1.6-x64.exe  142 MB  -> GitHub Releases
+#   dist/DeepSeek-Harness-win-unpacked-0.1.6.zip  252 MB  -> GitHub Releases
 #
 # All four ship as release assets instead (see README, "下载成品").
 dist/*.exe
@@ -22,6 +23,11 @@ app/node_modules/electron/dist/*.exe
 
 # NSIS delta-update sidecar for the installer; meaningless without the .exe.
 dist/*.exe.blockmap
+
+# Release packaging: the zip of the packaged tree is >100 MB and is published
+# as a release asset, never as a repository object.
+dist/*.zip
+dist/*.7z
 
 # --- Installed build dependencies (restored by `npm install`) ---------------
 # Anchored to the project root on purpose: runtime/node_modules IS the shipped
@@ -59,3 +65,6 @@ smoke.png
 Thumbs.db
 Desktop.ini
 *.swp
+
+# --- Temporary local safety copy of .git during history surgery --------------
+.git-backup/
