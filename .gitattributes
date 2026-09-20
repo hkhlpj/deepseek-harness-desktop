@@ -1,0 +1,39 @@
+# Normalize text files to LF in the repository, but keep Windows-native
+# scripts checked out with CRLF so they stay directly runnable on Windows.
+* text=auto eol=lf
+
+*.js    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.html  text eol=lf
+*.md    text eol=lf
+
+*.ps1   text eol=crlf
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+
+# Build artifacts and bundled binaries must never be line-ending converted.
+*.exe   binary
+*.dll   binary
+*.node  binary
+*.pak   binary
+*.bin   binary
+*.dat   binary
+*.ico   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.gif   binary
+*.zip   binary
+*.gz    binary
+*.blockmap binary
+
+# Keeps diffs and language stats readable on the vendored trees.
+dist/win-unpacked/** linguist-vendored
+runtime/node_modules/** linguist-vendored
+src/repo/** linguist-vendored
+app/node_modules/** linguist-vendored
+
+docs/screenshots/*.png linguist-documentation

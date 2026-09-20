@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------------------
+# DeepSeek Harness standalone desktop build - repository ignore rules
+#
+# Policy: keep the whole working tree in version control (dist/, runtime/,
+# src/ included) and only push aside the artifacts GitHub cannot accept.
+# ---------------------------------------------------------------------------
+
+# --- GitHub hard limit: no file above 100 MB survives a push ----------------
+# These four are also byte-for-byte duplicates of content that IS tracked,
+# or are reproducible from it, so nothing unique is lost:
+#
+#   app/node_modules/electron/dist/electron.exe   235 MB  -> npm install
+#   dist/win-unpacked/DeepSeek Harness.exe        235 MB  -> == that Electron runtime
+#   dist/DeepSeek-Harness-Setup-0.1.6.exe         142 MB  -> GitHub Releases
+#   dist/DeepSeek-Harness-Portable-0.1.6-x64.exe  142 MB  -> GitHub Releases
+#
+# All four ship as release assets instead (see README, "下载成品").
+dist/*.exe
+dist/win-unpacked/*.exe
+app/node_modules/electron/dist/electron.exe
+app/node_modules/electron/dist/*.exe
+
+# NSIS delta-update sidecar for the installer; meaningless without the .exe.
+dist/*.exe.blockmap
+
+# --- Installed build dependencies (restored by `npm install`) ---------------
+# Anchored to the project root on purpose: runtime/node_modules IS the shipped
+# dsh dependency tree and must stay in the repository.
+/app/node_modules/
+
+# --- Build scratch space ----------------------------------------------------
+app/dist/
+dist/*.7z
+dist/*-unpacked.tmp/
+
+# --- Local shell state and consumer runtime data ----------------------------
+# Credentials never belong in a repository. The desktop shell reads them from
+# %USERPROFILE%\.dsh\.credentials.yaml at runtime, or from DEEPSEEK_API_KEY.
+.credentials.yaml
+**/.credentials.yaml
+.dsh/
+settings.json
+prompt-patch.yml
+shell.log
+*.log
+
+# --- Locally unpacked toolchain (portable MinGit used to publish this repo) --
+# Downloaded from the npmmirror git-for-windows binary mirror; not part of the
+# project and not distributable from here.
+tools/git/
+
+# --- Smoke-test / screenshot scratch output ---------------------------------
+smoke.png
+*-shot.png
+
+# --- Editor and OS noise ----------------------------------------------------
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.swp

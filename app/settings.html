@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src file: data:; script-src 'unsafe-inline';" />
+<title>设置 - DeepSeek Harness</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #11141b; color: #e6ebf5;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 13px; display: flex; flex-direction: column;
+  }
+  header { padding: 18px 22px 10px; border-bottom: 1px solid #1e2431; }
+  header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  header p { margin: 4px 0 0; color: #8b95a7; font-size: 12px; }
+  main { flex: 1; overflow-y: auto; padding: 16px 22px 8px; }
+  section { background: #161a23; border: 1px solid #1f2531; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  section h2 { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: #cfd8e6; }
+  label { display: block; margin: 10px 0 5px; color: #98a3b5; font-size: 12px; }
+  select, textarea, input[type=text] {
+    width: 100%; background: #0d1017; color: #e6ebf5;
+    border: 1px solid #262d3b; border-radius: 7px; padding: 8px 10px;
+    font-family: inherit; font-size: 13px; outline: none;
+  }
+  select:focus, textarea:focus { border-color: #4d7cff; }
+  textarea { resize: vertical; min-height: 150px; line-height: 1.55; }
+  .hint { color: #77839a; font-size: 11.5px; margin: 6px 0 0; line-height: 1.5; }
+  code { background: #0d1017; border: 1px solid #262d3b; border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  button {
+    border: 1px solid #2b3344; background: #1c2230; color: #e6ebf5;
+    border-radius: 7px; padding: 8px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  button:hover { background: #232b3c; }
+  button.primary { background: linear-gradient(150deg, #4d7cff, #6a5cff); border-color: transparent; font-weight: 600; }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost { background: transparent; }
+  button:disabled { opacity: .5; cursor: default; }
+  .preview {
+    margin-top: 10px; height: 150px; border-radius: 8px; border: 1px dashed #2b3344;
+    background: #0d1017 center/cover no-repeat;
+    display: flex; align-items: center; justify-content: center;
+    color: #5d687d; font-size: 12px; overflow: hidden;
+  }
+  input[type=range] { width: 100%; accent-color: #4d7cff; }
+  footer { display: flex; align-items: center; gap: 10px; padding: 12px 22px; border-top: 1px solid #1e2431; background: #0f1219; }
+  #status { color: #8b95a7; font-size: 12px; flex: 1; }
+  #status.ok { color: #4ade80; }
+  #status.err { color: #f87171; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>设置</h1>
+    <p>提示词（系统提示）与界面背景</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>提示词</h2>
+      <label for="preset">预设</label>
+      <select id="preset"></select>
+      <p class="hint" id="presetDesc"></p>
+      <label for="prompt">系统提示词内容</label>
+      <textarea id="prompt" spellcheck="false" placeholder="留空则使用 DeepSeek Harness 内置的默认提示词"></textarea>
+      <p class="hint">支持 <code>{{model}}</code> 与 <code>{{cwd}}</code> 变量。它会作为人格前缀注入到系统提示的最前面；保存后本地服务会自动重启一次。</p>
+    </section>
+
+    <section>
+      <h2>背景图片</h2>
+      <div class="row">
+        <button id="pick">选择图片…</button>
+        <button id="clear" class="ghost">清除背景</button>
+        <span class="hint" id="bgPath" style="margin:0"></span>
+      </div>
+      <div class="preview" id="preview"><span id="previewHint">未设置背景图片</span></div>
+      <label>不透明度 <span id="opacityVal">35%</span></label>
+      <input type="range" id="opacity" min="0" max="100" step="1" value="35" />
+      <label>模糊 <span id="blurVal">0 px</span></label>
+      <input type="range" id="blur" min="0" max="40" step="1" value="0" />
+      <label for="blend">混合模式</label>
+      <select id="blend">
+        <option value="multiply">正片叠底（染色，文字最清晰）</option>
+        <option value="soft-light">柔光（柔和）</option>
+        <option value="overlay">叠加（对比更强）</option>
+        <option value="screen">滤色（提亮）</option>
+        <option value="normal">正常（直接覆盖）</option>
+      </select>
+      <p class="hint">背景图片会以整窗覆盖层的形式叠加在界面之上，文字始终保持清晰。推荐“正片叠底”。</p>
+    </section>
+  </main>
+
+  <footer>
+    <span id="status"></span>
+    <button id="close" class="ghost">关闭</button>
+    <button id="save" class="primary">保存并应用</button>
+  </footer>
+
+  <script>
+    const api = window.dshSettings
+    const $ = (id) => document.getElementById(id)
+    let presets = []
+    let settings = { presetId: 'builtin', systemPrompt: '', backgroundImage: '', backgroundOpacity: 0.35, backgroundBlur: 0 }
+
+    function updatePreview () {
+      const box = $('preview')
+      const hint = $('previewHint')
+      const file = settings.backgroundImage
+      if (file) {
+        box.style.backgroundImage = 'url("' + file.replace(/\\/g, '/').replace(/"/g, '%22') + '")'
+        box.style.backgroundSize = 'cover'
+        box.style.backgroundPosition = 'center'
+        hint.style.display = 'none'
+        $('bgPath').textContent = file
+      } else {
+        box.style.backgroundImage = ''
+        hint.style.display = ''
+        $('bgPath').textContent = ''
+      }
+    }
+
+    function presetById (id) { return presets.find((p) => p.id === id) }
+
+    function selectPreset (id, keepText) {
+      const preset = presetById(id)
+      if (!preset) return
+      settings.presetId = id
+      $('preset').value = id
+      $('presetDesc').textContent = preset.description || ''
+      if (id !== 'custom' && !keepText) {
+        settings.systemPrompt = preset.text
+        $('prompt').value = preset.text
+      }
+    }
+
+    function sync () {
+      $('opacity').value = String(Math.round((settings.backgroundOpacity ?? 0.55) * 100))
+      $('opacityVal').textContent = Math.round((settings.backgroundOpacity ?? 0.55) * 100) + '%'
+      $('blur').value = String(settings.backgroundBlur ?? 0)
+      $('blurVal').textContent = (settings.backgroundBlur ?? 0) + ' px'
+      $('blend').value = settings.backgroundBlend || 'multiply'
+      $('prompt').value = settings.systemPrompt || ''
+      updatePreview()
+    }
+
+    async function boot () {
+      const data = await api.get()
+      presets = data.presets
+      settings = { ...data.settings }
+      const sel = $('preset')
+      sel.innerHTML = ''
+      for (const preset of presets) {
+        const option = document.createElement('option')
+        option.value = preset.id
+        option.textContent = preset.label
+        sel.appendChild(option)
+      }
+      selectPreset(settings.presetId || 'builtin', true)
+      sync()
+    }
+
+    $('preset').addEventListener('change', (e) => selectPreset(e.target.value, false))
+    $('prompt').addEventListener('input', (e) => {
+      settings.systemPrompt = e.target.value
+      if (settings.presetId !== 'custom') {
+        const preset = presetById(settings.presetId)
+        settings.presetId = preset && preset.text === e.target.value ? settings.presetId : 'custom'
+        $('preset').value = settings.presetId
+        $('presetDesc').textContent = (presetById(settings.presetId) || {}).description || ''
+      }
+    })
+    $('opacity').addEventListener('input', (e) => {
+      settings.backgroundOpacity = Number(e.target.value) / 100
+      $('opacityVal').textContent = e.target.value + '%'
+    })
+    $('blur').addEventListener('input', (e) => {
+      settings.backgroundBlur = Number(e.target.value)
+      $('blurVal').textContent = e.target.value + ' px'
+    })
+    $('blend').addEventListener('change', (e) => { settings.backgroundBlend = e.target.value })
+    $('pick').addEventListener('click', async () => {
+      const file = await api.pickBackground()
+      if (file) { settings.backgroundImage = file; updatePreview() }
+    })
+    $('clear').addEventListener('click', () => { settings.backgroundImage = ''; updatePreview() })
+    $('close').addEventListener('click', () => api.close())
+
+    $('save').addEventListener('click', async () => {
+      const status = $('status')
+      const button = $('save')
+      button.disabled = true
+      status.className = ''
+      status.textContent = '正在保存…'
+      try {
+        const result = await api.apply(settings)
+        if (result && result.ok) {
+          status.className = 'ok'
+          status.textContent = result.restarted ? '已保存，本地服务已重启。' : '已保存并应用。'
+        } else {
+          status.className = 'err'
+          status.textContent = '保存失败：' + ((result && result.error) || '未知错误')
+        }
+      } catch (error) {
+        status.className = 'err'
+        status.textContent = '保存失败：' + error
+      } finally {
+        button.disabled = false
+      }
+    })
+
+    boot()
+  </script>
+</body>
+</html>

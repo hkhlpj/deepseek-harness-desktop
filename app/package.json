@@ -1,0 +1,81 @@
+{
+  "name": "dsh-desktop-standalone",
+  "productName": "DeepSeek Harness",
+  "version": "0.1.6",
+  "description": "Standalone desktop build of DeepSeek Harness (Electron shell around the bundled dsh web host).",
+  "main": "main.js",
+  "license": "MIT",
+  "private": true,
+  "author": {
+    "name": "DeepSeek Harness standalone build"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist:dir": "electron-builder --win --x64 --dir",
+    "dist": "electron-builder --win --x64 --config.win.target=portable",
+    "dist:nsis": "electron-builder --win --x64 --config.win.target=nsis"
+  },
+  "devDependencies": {
+    "electron": "44.4.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "ai.deepseek.harness.standalone",
+    "productName": "DeepSeek Harness",
+    "copyright": "DeepSeek Harness is licensed under MIT.",
+    "directories": {
+      "output": "../dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "loading.html",
+      "settings.html",
+      "settings-preload.js",
+      "package.json",
+      "build/icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "../runtime/node",
+        "to": "runtime/node"
+      },
+      {
+        "from": "../runtime/node_modules",
+        "to": "runtime/node_modules"
+      }
+    ],
+    "asar": true,
+    "compression": "normal",
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "DeepSeek-Harness-Portable-${version}-${arch}.exe"
+    },
+    "portable": {
+      "unpackDirName": "dsh-desktop-${version}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DeepSeek Harness",
+      "artifactName": "DeepSeek-Harness-Setup-${version}.exe"
+    }
+  }
+}
